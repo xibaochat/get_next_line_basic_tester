@@ -16,7 +16,7 @@ print_test_type () {
 compile_test () {
 	# $1 ~> name of test c source file
 	# $2 ~> buffer size
-	echo -e "\e[91mBUFFER_SIZE = $2\e[39m"
+	echo -e "\e[4m\e[93mBUFFER_SIZE = $2\e[39m\e[0m"
 	gcc -Wall -Wextra -Werror get_next_line.c get_next_line_utils.c $TEST_DIR/src/$1 -I . -D BUFFER_SIZE=$2 -o gnl
 }
 
@@ -25,7 +25,12 @@ compile_test () {
 #########
 basic_tester () {
 	printf "$1: "
-	./gnl $TEST_DIR/files/$1 > gnl.res
+	valgrind --error-exitcode=1 ./gnl $TEST_DIR/files/$1 2>&- > gnl.res
+	if [[ $? -eq 127 ]];
+	then
+		echo  -e "\e[31mLEAKS\e[39m"
+		return
+	fi
 	diff $TEST_DIR/files/$1 gnl.res 2>/dev/null > /dev/null
 	if [[ $? -eq 0 ]];
 	then
@@ -72,7 +77,12 @@ basic_test
 
 few_lines_tester () {
 	printf "$1: "
-	./gnl $TEST_DIR/files/$1 > gnl.res
+	valgrind --error-exitcode=1  ./gnl $TEST_DIR/files/$1 2>&- > gnl.res
+	if [[ $? -eq 127 ]];
+	then
+		echo  -e "\e[31mLEAKS\e[39m"
+		return
+	fi
 	head -n 3 $TEST_DIR/files/$1 > expected.res
 	diff gnl.res expected.res 2>/dev/null > /dev/null
 	if [[ $? -eq 0 ]];
@@ -152,7 +162,12 @@ return_value_tester empty_file 0
 stdin_tester () {
 	printf "$1: "
 	echo $2 > expected.res
-	echo $2 | ./gnl > gnl.res
+	echo $2 | valgrind --error-exitcode=1  ./gnl 2>&- > gnl.res
+	if [[ $? -eq 127 ]];
+	then
+		echo  -e "\e[31mLEAKS\e[39m"
+		return
+	fi
 	diff expected.res gnl.res
 	if [[ $? -eq 0 ]];
 	then
@@ -209,7 +224,12 @@ stdin_test
 multi_fd_test()
 {
 	printf "$1 - $2: "
-	./gnl $TEST_DIR/files/$1 $TEST_DIR/files/$2
+	valgrind --error-exitcode=1 ./gnl $TEST_DIR/files/$1 $TEST_DIR/files/$2 2>&-
+	if [[ $? -eq 127 ]];
+	then
+		echo  -e "\e[31mLEAKS\e[39m"
+		return
+	fi
 	diff output_f0 $TEST_DIR/files/$1 2>/dev/null > /dev/null
 	if [[ $? -eq 0 ]];
 	then
