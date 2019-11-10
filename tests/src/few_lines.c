@@ -1,8 +1,19 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 int get_next_line(int fd, char **line);
+
+void print_and_free(char **line)
+{
+	if (*line)
+	{
+		printf("%s\n", *line);
+		free(*line);
+		*line = NULL;
+	}
+}
 
 int main(int ac, char **av)
 {
@@ -12,13 +23,11 @@ int main(int ac, char **av)
 
 	line = NULL;
 	get_next_line(fd, &line);
-	if (line)
-		printf("%s\n", line);
+	print_and_free(&line);
 	get_next_line(fd, &line);
-	if (line)
-		printf("%s\n", line);
+	print_and_free(&line);
 	get_next_line(fd, &line);
-	if (line)
-		printf("%s\n", line);
+	print_and_free(&line);
+	close(fd);
 	return (0);
 }

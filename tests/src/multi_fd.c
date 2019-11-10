@@ -1,4 +1,5 @@
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
+#include <string.h>
 
 int main(int ac, char **av)
 {
@@ -21,7 +22,7 @@ int main(int ac, char **av)
 			res1 = get_next_line(fd1, &line1);
 		if (line0)
 		{
-			write(fdo0, line0, ft_strlen(line0));
+			write(fdo0, line0, strlen(line0));
 			if (res0)
 				write(fdo0, "\n", 1);
 			free(line0);
@@ -29,7 +30,7 @@ int main(int ac, char **av)
 		}
 		if (line1)
 		{
-			write(fdo1, line1, ft_strlen(line1));
+			write(fdo1, line1, strlen(line1));
 			if (res1)
 				write(fdo1, "\n", 1);
 			free(line1);
